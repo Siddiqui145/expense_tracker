@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/widgets/chart.dart';
 import 'package:expense_tracker/widgets/expenses_list.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
-import 'package:expense_tracker/widgets/screens/login.dart';
+import 'package:expense_tracker/screens/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -17,14 +16,12 @@ class Expenses extends StatefulWidget {
 //When we have single return statement we could simply use arrow function.
 
 class _ExpensesState extends State<Expenses> {
-  final user = FirebaseAuth.instance.currentUser!.email;
-
   final List<Expense> _registeredExpense = [
     Expense(
         title: "Bike Service",
         amount: 3000,
         date: DateTime.now(),
-        category: Category.travel),
+        category: Category.work),
     Expense(
         title: "Access Service",
         amount: 1500,
@@ -32,31 +29,7 @@ class _ExpensesState extends State<Expenses> {
         category: Category.travel)
   ];
 
-  Widget buildFirestoreExpenseList() {
-    return StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('expenses').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No Data Here..."));
-          }
-          final expenses = snapshot.data!.docs
-              .map((doc) => Expense.fromFireStore(
-                  doc.data(), doc.id))
-              .toList();
-
-          return ExpensesList(
-              expenses: expenses,
-              onRemoveExpense: (expense) =>
-                  _removeExpense(expense.id as Expense));
-        });
-  }
-
-  void _openAddExpenseOverlay() {
+    void _openAddExpenseOverlay() {
     showModalBottomSheet(
         useSafeArea: true, //won't take space of device camera or stuff
         isScrollControlled:
@@ -70,14 +43,10 @@ class _ExpensesState extends State<Expenses> {
   //allows for multiple widgets adding and
   //context : widgets meta information and also its position in widget tree
 
-  void _addExpense(Expense expense) async {
-    await FirebaseFirestore.instance
-        .collection('expenses')
-        .add(expense.toFirestore());
-
-    // setState(() {
-    //   _registeredExpense.add(expense);
-    // });
+  void _addExpense(Expense expense) {
+      setState(() {
+          _registeredExpense.add(expense);
+      });
   }
 
   signout() async {
@@ -105,16 +74,16 @@ class _ExpensesState extends State<Expenses> {
     //     (context), MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
-  void _removeExpense(Expense expense) async {
-    await FirebaseFirestore.instance.collection('expenses').doc().delete();
-
-    final expenseIndex = _registeredExpense.indexOf(
+  void _removeExpense(Expense expense) {
+       final expenseIndex = _registeredExpense.indexOf(
         expense); //we need to get back with undo the event we removed so we can use indexof
     setState(() {
       _registeredExpense.remove(expense);
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        duration: const Duration(seconds: 3),
         content: const Center(
           child: Text('Expense Deleted'),
         ),
@@ -170,15 +139,15 @@ class _ExpensesState extends State<Expenses> {
       body: width < 600
           ? Column(
               children: [
-                Text(
-                  'WELCOME, $user',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                // Text(
+                //   'WELCOME, $user',
+                //   style: Theme.of(context).textTheme.titleMedium,
+                // ),
                 Chart(expenses: _registeredExpense),
                 const SizedBox(
                   height: 15,
                 ),
-                Expanded(child: buildFirestoreExpenseList()),
+                Expanded(child: mainContent),
               ],
             )
           //const Text('The Chart'),
@@ -206,7 +175,7 @@ class _ExpensesState extends State<Expenses> {
                     child: Chart(
                         expenses:
                             _registeredExpense)), //without expanded it was width as double.infinity which wasn't working
-                Expanded(child: buildFirestoreExpenseList()),
+                Expanded(child: mainContent),
               ],
             ),
     );
