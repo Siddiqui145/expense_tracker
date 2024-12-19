@@ -10,7 +10,7 @@ const uuid = Uuid();
 //enum allows to define a category explicitly by us and we can use,
 //custom type specifically
 
-enum Category { food, travel, leisure, work }
+enum Category { food, travel, leisure, work, friends, personal }
 //No = or "" coz we defined by ourselves as our need...
 
 const categoryIcons = {
@@ -18,6 +18,8 @@ const categoryIcons = {
   Category.travel: Icons.flight,
   Category.leisure: Icons.movie,
   Category.work: Icons.work,
+  Category.friends: Icons.dangerous,
+  Category.personal: Icons.favorite,
 };
 
 class Expense {
