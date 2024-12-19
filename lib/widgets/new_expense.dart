@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter/rendering.dart';
 
 class NewExpense extends StatefulWidget {
   const NewExpense({super.key, required this.onAddExpense});
@@ -13,16 +11,6 @@ class NewExpense extends StatefulWidget {
 }
 
 class _NewExpenseState extends State<NewExpense> {
-  // var _enteredTitle = '';
-  // void _saveTitleInput(String inputValue) {
-  //   _enteredTitle = inputValue;
-  // } => Can use this feature but need to define for each which could be performance loss
-
-  final _db = FirebaseFirestore.instance; //import the root database
-
-  // createExpense(Expense user) async{
-  //   _db.collection("expenses").add(expense.)
-  // }
 
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
@@ -42,21 +30,21 @@ class _NewExpenseState extends State<NewExpense> {
     });
   }
 
-  Future<void> uploadExpense() async {
-    try {
-      final data = await FirebaseFirestore.instance.collection("expenses").add({
-        "Title": _titleController.text.trim(),
-        "Amount": _priceController.text.trim(),
-        "Date": _selectedDate,
-        "SavedAt": FieldValue.serverTimestamp(),
-        "Category": _selectedCategory.name,
-      });
-      Navigator.pop(context);
-      //print(data.id);
-    } catch (e) {
-      print(e);
-    }
-  }
+  // Future<void> uploadExpense() async {
+  //   try {
+  //     final data = await FirebaseFirestore.instance.collection("expenses").add({
+  //       "Title": _titleController.text.trim(),
+  //       "Amount": _priceController.text.trim(),
+  //       "Date": _selectedDate,
+  //       "SavedAt": FieldValue.serverTimestamp(),
+  //       "Category": _selectedCategory.name,
+  //     });
+  //     Navigator.pop(context);
+  //     //print(data.id);
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   //can use then now.then coz date would be coming from future and hence this way it would be allowed
   //more convenient way is to use async and await coz Date is a future value
@@ -290,8 +278,8 @@ class _NewExpenseState extends State<NewExpense> {
                             },
                             child: const Text('Cancel')),
                         ElevatedButton(
-                            onPressed: () async {
-                              uploadExpense();
+                            onPressed: () {
+                              _submitExpenseData();
                             },
                             child: const Text('Save Expense'))
                       ],
